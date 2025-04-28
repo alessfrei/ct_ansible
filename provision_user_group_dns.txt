@@ -1,0 +1,41 @@
+- name: Criar usuario
+  hosts: all
+  become: yes
+  vars_files:
+    - vars.yml
+  tasks:
+    - name: Criar o grupo (se não existir)
+      group:
+        name: "{{ group }}"
+        state: present
+
+    - name: Criar o usuário
+      user:
+        name: "{{ username }}"
+        group: "{{ group }}"
+        shell: "{{ shell }}"
+        home: "{{ home_directory }}"
+        password: "{{ password | password_hash('sha512') }}"
+        state: present
+
+    - name: Check if resolv.conf file exists
+      stat:
+         path: /etc/resolv.conf
+      register: file_info
+
+    - name: Create /etc/resolv.conf if it exists
+      file:
+        path: /etc/resolv.conf
+        state: touch
+      when: not file_info.stat.exists
+
+    - name: Set DNS nameservers in /etc/resolv.conf
+      blockinfile:
+        path: /etc/resolv.conf
+        block: |
+            search hc.ufmg.br
+            nameserver 150.164.255.231
+            nameserver 150.164.255.232
+            nameserver 208.67.222.222
+            nameserver 208.67.220.220
+      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
