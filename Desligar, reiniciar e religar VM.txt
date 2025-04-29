@@ -1,0 +1,44 @@
+Desligar VM
+
+
+# desligar_vm.yml
+- name: Desligar VM
+  hosts: minhas_vms
+  become: yes
+  tasks:
+    - name: Desligar a máquina
+      ansible.builtin.command: shutdown now
+
+
+hosts: minhas_vms → Define no seu inventory quem são as VMs.
+
+become: yes → Sobe pra root pra conseguir mandar o shutdown.
+
+command: shutdown now → Mata o sistema na hora.
+
+
+Reiniciar VM
+
+# reiniciar_vm.yml
+- name: Reiniciar VM
+  hosts: minhas_vms
+  become: yes
+  tasks:
+    - name: Reiniciar a máquina
+      ansible.builtin.reboot:
+        reboot_timeout: 600
+
+Religar VM
+
+# ligar_vm.yml
+- name: Ligar a VM no libvirt
+  hosts: localhost
+  tasks:
+    - name: Startar a VM
+      community.libvirt.virt:
+        name: nome_da_vm
+        state: running
+
+
+
+
