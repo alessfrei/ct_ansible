@@ -1,0 +1,28 @@
+---
+- name: Faz a atualização do cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+
+      #- name: Atualiza a versão do SO semelhante (apt-get dist-upgrade)
+      #ansible.builtin.apt:
+      # upgrade: dist
+
+- name: Nao atualiza os pacotes da lista evita quebrar cluter
+  dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-ce-rootless-extras
+
+- name: Atualiza todos os pacotes do servidor para ultima versao
+  apt:
+    name: "*"
+    state: latest
+    autoremove: yes
+  when: ansible_distribution == 'Ubuntu'
